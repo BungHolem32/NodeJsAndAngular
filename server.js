@@ -1,42 +1,34 @@
-//create const variables
-const PORT = 8000 || process.env.PORT;
-const DB = "mongodb://localhost/NodeJs&Angular2";
+const PORT = 3000;
+const DB;
 
-var mongoose = require('mongoose');
 var express = require('express');
-var bodyParser = require('body-parser');
 var path = require('path');
-var morgan = require('morgan');
+var bodyParser = require('body-parser');
+
+var index = require('./routes/index');
+var api = require('./routes/api');
+
 var app = express();
 
-var mainRouter = require('./routes/index');
-var apiRouter = require('./routes/api');
+//View Engine
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
-app.use(morgan('dev'));
+//====run templates with html extension===
+app.engine('html', require('ejs').renderFile);
+
+
+//Set Static Folder
+app.use(express.static(path.join(__dirname + '/client')));
+
+//Body Parser MW
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.urlencoded({extended: false}));
 
-app.use('/', mainRouter);
-app.use('/api', apiRouter);
+//Routes
+app.use('/', index);
+app.use('/api', api);
 
-
-mongoose.connect(DB,function(err){
-    if(err){
-        return err;
-    }else{
-        console.log('Successfuly connected to ' + DB);
-    }
+app.listen(PORT, function(){
+    console.log('Server started on port ' + PORT);
 });
-
-app.set('views',path.join(__dirname , '/client/views'));
-app.set('view engine','ejs');
-app.engine('html',require('ejs').renderFile);
-
-app.use(express.static(__dirname + '/client'));
-
-
-app.listen(PORT,function(){
-    console.log('you listening to port ->' + PORT);
-});
-
-
